@@ -131,13 +131,11 @@ mkdir -p "$(dirname "$SQUASHFS_FQNAME")"
 basename "$SQUASHFS_FQNAME" > "$(dirname "$SQUASHFS_FQNAME")/filesystem.module"
 $MKSQUASHFS /remaster/chroot "$SQUASHFS_FQNAME"
 
-cp /remaster/cdrom/usr/lib/grub/i386-pc/boot_hybrid.img /remaster/tmp/
-
 umount /remaster/chroot /remaster/cdrom
 
 $MKISO -b boot/grub/i386-pc/eltorito.img -no-emul-boot \
         -boot-load-size 4 -boot-info-table \
-        --grub2-boot-info --grub2-mbr /remaster/tmp/boot_hybrid.img \
+        --grub2-boot-info --grub2-mbr "${LIVE_PATH_BOOT}"/grub/i386-pc/boot_hybrid.img \
         -no-pad \
         -l -r -J -o "$1" /remaster/iso
 # pad for partition table

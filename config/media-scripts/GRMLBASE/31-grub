@@ -141,9 +141,13 @@ if ifclass AMD64 ; then
   echo "I: Copying GRUB core.img for BIOS boot"
   cp --preserve=timestamp "${target}"/boot/grub/i386-pc/core.img "${media_dir}"/boot/grub/i386-pc/
 
+  echo "I: Copying GRUB boot_hybrid.img for BIOS boot"
+  # boot_hybrid.img needs to be available to xorriso
+  cp --preserve=timestamp "${target}"/usr/lib/grub/i386-pc/boot_hybrid.img "${media_dir}"/boot/grub/i386-pc/
+
   # Create El Torito boot image for BIOS
   # This is a bootable image that will be embedded in the ISO
-  echo "I: Creating GRUB El Torito boot image for BIOS"
+  echo "I: Creating GRUB El Torito boot image for BIOS boot"
 
   # The eltorito.img needs to contain:
   # 1. boot.img (first 512 bytes - MBR boot sector)

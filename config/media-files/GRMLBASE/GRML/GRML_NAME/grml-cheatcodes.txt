@@ -260,7 +260,7 @@ the configuration framework of grml.
         -no-emul-boot -boot-load-size 4 -boot-info-table \
         -b boot/grub/i386-pc/eltorito.img \
         --grub2-boot-info --grub2-mbr \
-        /chroot/usr/lib/grub/i386-pc/boot_hybrid.img
+        grml_cd/boot/grub/i386-pc/boot_hybrid.img
 
 as option to mkisofs/xorriso. Otherwise your CD won't be bootable. The
 directory live, containing the squashfs compressed filesystem file,
