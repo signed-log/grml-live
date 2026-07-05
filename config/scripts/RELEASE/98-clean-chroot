@@ -59,14 +59,14 @@ echo "exit" | $ROOTCMD setpriv --reuid="${USERNAME}" --regid="${USERNAME}" --cle
 rm -f "$target"/home/"${USERNAME}"/.zsh_history
 
 echo "Listing homedir of user root:"
-ls -la "$target"/root
+$ROOTCMD ls -la /root
 echo "Listing homedir of user ${USERNAME}:"
-ls -la "$target"/home/"${USERNAME}"
+$ROOTCMD ls -la /home/"${USERNAME}"
 
 # "assert" zcompdump was created.
 echo "Checking existence of /root/.zcompdump and /home/${USERNAME}/.zcompdump"
-ls -la "$target"/root/.zcompdump
-ls -la "$target"/home/"${USERNAME}"/.zcompdump
+$ROOTCMD ls -la /root/.zcompdump
+$ROOTCMD ls -la /home/"${USERNAME}"/.zcompdump
 
 ## END OF FILE #################################################################
 # vim:ft=sh expandtab ai tw=80 tabstop=4 shiftwidth=2
