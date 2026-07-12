@@ -20,21 +20,6 @@ mkdir -p "${media_dir}/boot/grub" "${tftpboot_dir}"
 
 grml-live-command copy-media-files media -r /boot/grub
 
-# generate loopback.cfg config file without depending on grub's regexp module
-# which isn't available in Debian/squeeze
-echo "## grub2 loopback configuration" > "${media_dir}"/boot/grub/loopback.cfg
-echo "source /boot/grub/header.cfg" >> "${media_dir}"/boot/grub/loopback.cfg
-for config in "${media_dir}"/boot/grub/*_default.cfg "${media_dir}"/boot/grub/*_options.cfg ; do
-  [ -r "$config" ] || continue
-  echo "source ${config##"$media_dir"}" >> "${media_dir}"/boot/grub/loopback.cfg
-done
-if [ -z "$NO_ADDONS" ] ; then
-  echo "source /boot/grub/addons.cfg" >> "${media_dir}"/boot/grub/loopback.cfg
-else
-  rm -f "${media_dir}"/boot/grub/addons.cfg
-fi
-echo "source /boot/grub/footer.cfg" >> "${media_dir}"/boot/grub/loopback.cfg
-
 # copy modules for GRUB
 if [ "${ARCH}" = "arm64" ] ; then
   mkdir -p "${media_dir}"/boot/grub/arm64-efi/
