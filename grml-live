@@ -745,7 +745,7 @@ elif [ -n "$UPDATE" ] ; then
   FAI_ACTION=softupdate
 elif [ -n "$BUILD_DIRTY" ] ; then
   FAI_ACTION=rebuild
-elif [ -d "$CHROOT_OUTPUT/etc/debian_version" ] ; then
+elif [ -r "$CHROOT_OUTPUT/etc/debian_version" ] ; then
   log   "Skipping chroot bootstrap as $CHROOT_OUTPUT exists already."
   ewarn "Skipping chroot bootstrap as $CHROOT_OUTPUT exists already." ; eend 0
   FAI_ACTION=rebuild
