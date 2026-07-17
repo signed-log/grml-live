@@ -93,7 +93,7 @@ grub_setup() {
           echo "I: Secure Boot is enabled [mode: ${SECURE_BOOT}]"
 
           grml-live-command copy-media-files media /secureboot/grub.cfg
-          $ROOTCMD mv "${GRML_LIVE_MEDIADIR}"/secureboot/grub.cfg /tmp
+          $ROOTCMD cp "${GRML_LIVE_MEDIADIR}"/secureboot/grub.cfg /tmp
 
           grml-live-adjust-boot-files "${target}"/tmp/grub.cfg
 
