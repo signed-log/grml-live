@@ -58,11 +58,8 @@ Usage: $PN [options, see as follows]
    -i <iso_name>           name of ISO
    -I <src_directory>      directory which provides files that should become
                            part of the chroot/ISO
-   -n                      skip generation of ISO
-   -N                      bootstrap (build chroot) only, do not create files for ISO
    -o <output_directory>   main output directory of the build process
    -q                      skip mksquashfs
-   -Q                      skip netboot package build
    -r <release_name>       release name
    -R                      skip applying RELEASE clean up
    -s <suite>              Debian suite/release, like: stable, testing, unstable
@@ -108,7 +105,6 @@ FORCE=''
 UPDATE=''
 BUILD_ONLY=''
 BUILD_DIRTY=''
-BOOTSTRAP_ONLY=''
 HOSTNAME=''
 USERNAME=''
 CONFIGDUMP=''
@@ -233,7 +229,7 @@ hasclass() {
 # }}}
 
 # command line parsing {{{
-while getopts "C:c:d:D:e:g:i:I:o:r:s:U:v:w:AbBFhnNqQRu" opt; do
+while getopts "C:c:d:D:e:g:i:I:o:r:s:U:v:w:AbBFhqRu" opt; do
   case "$opt" in
     A) CLEAN_ARTIFACTS=1 ;;
     b) BUILD_ONLY=1 ;;
@@ -247,11 +243,8 @@ while getopts "C:c:d:D:e:g:i:I:o:r:s:U:v:w:AbBFhnNqQRu" opt; do
     h) usage ; bailout 0 ;;
     i) ISO_NAME="$OPTARG" ;;
     I) CHROOT_INSTALL="$OPTARG" ;;
-    n) SKIP_MKISOFS=1 ;;
-    N) BOOTSTRAP_ONLY=1; SKIP_MKISOFS=1; SKIP_MKSQUASHFS=1 ;;
     o) OUTPUT="$(readlink -m "$OPTARG")" ;;
     q) SKIP_MKSQUASHFS=1 ;;
-    Q) SKIP_NETBOOT=1 ;;
     r) RELEASENAME="$OPTARG" ;;
     R) SKIP_RELEASE=1 ;;
     s) SUITE="$OPTARG" ;;
@@ -502,15 +495,9 @@ echo "  Architecture:      $ARCH"
 [ -n "$LOGFILE" ]             && echo "  Logging to file:   $LOGFILE"
 [ -n "$CLEAN_ARTIFACTS" ]     && echo "  Will clean output before and after running."
 [ -n "$UPDATE" ]              && echo "  Executing UPDATE instead of fresh installation."
-if [ -n "$BOOTSTRAP_ONLY" ] ; then
-    echo "  Bootstrapping only and not building (files for) ISO."
-else
-    [ -n "$SKIP_MKSQUASHFS" ]     && echo "  Skipping creation of SQUASHFS file."
-    [ -n "$SKIP_NETBOOT" ]        && echo "  Skipping creation of NETBOOT package."
-    [ -n "$SKIP_MKISOFS" ]        && echo "  Skipping creation of ISO file."
-    [ -n "$BUILD_ONLY" ]          && echo "  Executing BUILD_ONLY instead of fresh installation or UPDATE."
-    [ -n "$BUILD_DIRTY" ]         && echo "  Executing BUILD_DIRTY to leave chroot untouched."
-fi
+[ -n "$SKIP_MKSQUASHFS" ]     && echo "  Skipping creation of SQUASHFS file."
+[ -n "$BUILD_ONLY" ]          && echo "  Executing BUILD_ONLY instead of fresh installation or UPDATE."
+[ -n "$BUILD_DIRTY" ]         && echo "  Executing BUILD_DIRTY to leave chroot untouched."
 [ -n "$SKIP_RELEASE" ]        && echo "  Skipping RELEASE clean up."
 echo
 if [ -z "$FORCE" ] ; then
@@ -603,7 +590,7 @@ einfo "Logging actions to logfile $LOGFILE"
 # dump config variables into file, for hooks/scripts access {{{
 CONFIGDUMP=$(mktemp)
 set | grep -E \
-  '^(GRML_NAME|SHORT_NAME|RELEASENAME|RELEASE_INFO|RELEASE_INFO68|DATE|VERSION|SUITE|ARCH|DISTRI_INFO|DISTRI_NAME|SQUASHFS_NAME|SQUASHFS_NAME20|USERNAME|HOSTNAME|APT_PROXY|BUILD_ONLY|BOOTSTRAP_ONLY|WAYBACK_DATE|GRML_LIVE_DEBUG_APT|GRML_FAI_CONFIG|SOURCE_DATE_EPOCH|BOOTID|BOOT_FILE|DEFAULT_BOOTOPTIONS|SECURE_BOOT)=' \
+  '^(GRML_NAME|SHORT_NAME|RELEASENAME|RELEASE_INFO|RELEASE_INFO68|DATE|VERSION|SUITE|ARCH|DISTRI_INFO|DISTRI_NAME|SQUASHFS_NAME|SQUASHFS_NAME20|USERNAME|HOSTNAME|APT_PROXY|BUILD_ONLY|WAYBACK_DATE|GRML_LIVE_DEBUG_APT|GRML_FAI_CONFIG|SOURCE_DATE_EPOCH|BOOTID|BOOT_FILE|DEFAULT_BOOTOPTIONS|SECURE_BOOT)=' \
   > "${CONFIGDUMP}"
 # }}}
 
@@ -683,9 +670,7 @@ fi
 # }}}
 
 # execute minifai {{{
-if [ -n "$BOOTSTRAP_ONLY" ] ; then
-  FAI_ACTION=bootstrap
-elif [ -n "$BUILD_ONLY" ] ; then
+if [ -n "$BUILD_ONLY" ] ; then
   FAI_ACTION=reconfigure
 elif [ -n "$UPDATE" ] ; then
   FAI_ACTION=softupdate
@@ -748,17 +733,10 @@ einfo "Finished execution of stage 'fai $FAI_ACTION'"
 mkdir -p "$BUILD_OUTPUT" || bailout 6 "Problem with creating $BUILD_OUTPUT for stage ARCH"
 
 # prepare ISO
-if [ -n "$BOOTSTRAP_ONLY" ] ; then
-  log   "Skipping stage 'boot' as building with bootstrap only."
-  ewarn "Skipping stage 'boot' as building with bootstrap only." ; eend 0
-else
-  einfo "Installing media files from chroot build"
-  log   "Installing media files from chroot build"
-  cp --preserve=timestamp -r "$CHROOT_OUTPUT/grml-live/media/." "$BUILD_OUTPUT/"
-  eend 0
-
-  einfo "Finished execution of stage 'boot'" ; eend 0
-fi # BOOTSTRAP_ONLY
+einfo "Installing media files from chroot build"
+log   "Installing media files from chroot build"
+cp --preserve=timestamp -r "$CHROOT_OUTPUT/grml-live/media/." "$BUILD_OUTPUT/"
+eend 0
 
 # support installation of local files into the chroot/ISO
 if [ -n "$CHROOT_INSTALL" ] ; then
@@ -821,11 +799,9 @@ else
 fi
 
 # create md5sum file:
-if [ -z "$BOOTSTRAP_ONLY" ] ; then
-  # shellcheck disable=SC2094 # find execution ignores written file
-  ( cd "$BUILD_OUTPUT"/GRML/"${GRML_NAME}" &&
-  find ../.. -type f -not -name md5sums -exec md5sum {} \; > md5sums )
-fi
+# shellcheck disable=SC2094 # find execution ignores written file
+( cd "$BUILD_OUTPUT"/GRML/"${GRML_NAME}" &&
+find ../.. -type f -not -name md5sums -exec md5sum {} \; > md5sums )
 # }}}
 
 # information how the ISO was generated {{{
@@ -834,7 +810,6 @@ generate_build_info() {
   local output_dir_placeholder="<output_dir>"
   local configdump_placeholder="<configdump_file>"
   jo -p \
-    bootstrap_only="${BOOTSTRAP_ONLY}" \
     build_date="${DATE}" \
     build_dirty="${BUILD_DIRTY}" \
     build_only="${BUILD_ONLY}" \
@@ -871,9 +846,7 @@ generate_build_info() {
     release_info="${RELEASE_INFO}" \
     release_name="${RELEASENAME}" \
     secure_boot="${SECURE_BOOT}" \
-    skip_mkisofs="${SKIP_MKISOFS}" \
     skip_mksquashfs="${SKIP_MKSQUASHFS}" \
-    skip_netboot="${SKIP_NETBOOT}" \
     squashfs_name="${SQUASHFS_NAME}" \
     timestamp="${SOURCE_DATE_EPOCH}" \
     update_only="${UPDATE}" \
@@ -896,54 +869,49 @@ else
   BOOT_ARGS="-b boot/grub/i386-pc/eltorito.img -no-emul-boot -boot-load-size 4 -boot-info-table --grub2-boot-info --grub2-mbr ${BUILD_OUTPUT}/boot/grub/i386-pc/boot_hybrid.img"
 fi
 
-if [ -n "$SKIP_MKISOFS" ] ; then
-   log   "Skipping stage 'iso build' as requested via option -n or -N"
-   ewarn "Skipping stage 'iso build' as requested via option -n or -N" ; eend 0
+mkdir -p "$ISO_OUTPUT" || bailout 6 "Problem with creating $ISO_OUTPUT for stage 'iso build'"
+
+log   "Generating build information in conf/buildinfo.json"
+einfo "Generating build information in conf/buildinfo.json"
+mkdir -p "$BUILD_OUTPUT"/conf/
+generate_build_info > "$BUILD_OUTPUT"/conf/buildinfo.json
+cp "$BUILD_OUTPUT"/conf/buildinfo.json "$LOG_OUTPUT"/buildinfo.json
+eend $?
+
+cap_timestamps "$BUILD_OUTPUT"
+
+log "${XORRISO_BINARY} -as mkisofs -V '${GRML_NAME} ${VERSION}' -publisher 'grml-live | grml.org' -l -r -J ${BOOT_ARGS} ${EFI_ARGS} -o ${ISO_OUTPUT}/${ISO_NAME}"
+einfo "Generating ISO file..."
+touch -d @"$SOURCE_DATE_EPOCH" "$BUILD_OUTPUT"/
+# shellcheck disable=SC2086 # BOOT_ARGS and EFI_ARGS need splitting
+"${XORRISO_BINARY}" -as mkisofs -V "${GRML_NAME} ${VERSION}" -publisher 'grml-live | grml.org' -l -r -J ${BOOT_ARGS} ${EFI_ARGS} -o "${ISO_OUTPUT}/${ISO_NAME}" "$BUILD_OUTPUT"/
+RC=$?
+eend $RC
+
+# do not continue on errors, otherwise we might generate/overwrite the ISO with dd if=... stuff
+if [ "$RC" != 0 ] ; then
+  log    "Error: critical error while generating ISO [exit code ${RC}]. Exiting."
+  eerror "Error: critical error while generating ISO [exit code ${RC}]. Exiting." ; eend 1
+  bailout "$RC"
+fi
+
+# generate ISO checksums if we are using class 'RELEASE':
+if hasclass RELEASE && [ "$RC" = 0 ] ; then
+   (
+     if cd "$ISO_OUTPUT" ; then
+       sha256sum "${ISO_NAME}" > "${ISO_NAME}.sha256" && \
+       touch -r "${ISO_NAME}" "${ISO_NAME}.sha256"
+     fi
+   )
+fi
+
+if [ "$RC" = 0 ] ; then
+   log   "Finished execution of stage 'iso build' [$(date)]"
+   einfo "Finished execution of stage 'iso build'" ; eend 0
 else
-   mkdir -p "$ISO_OUTPUT" || bailout 6 "Problem with creating $ISO_OUTPUT for stage 'iso build'"
-
-   log   "Generating build information in conf/buildinfo.json"
-   einfo "Generating build information in conf/buildinfo.json"
-   mkdir -p "$BUILD_OUTPUT"/conf/
-   generate_build_info > "$BUILD_OUTPUT"/conf/buildinfo.json
-   cp "$BUILD_OUTPUT"/conf/buildinfo.json "$LOG_OUTPUT"/buildinfo.json
-   eend $?
-
-   cap_timestamps "$BUILD_OUTPUT"
-
-   log "${XORRISO_BINARY} -as mkisofs -V '${GRML_NAME} ${VERSION}' -publisher 'grml-live | grml.org' -l -r -J ${BOOT_ARGS} ${EFI_ARGS} -o ${ISO_OUTPUT}/${ISO_NAME}"
-   einfo "Generating ISO file..."
-   touch -d @"$SOURCE_DATE_EPOCH" "$BUILD_OUTPUT"/
-   # shellcheck disable=SC2086 # BOOT_ARGS and EFI_ARGS need splitting
-   "${XORRISO_BINARY}" -as mkisofs -V "${GRML_NAME} ${VERSION}" -publisher 'grml-live | grml.org' -l -r -J ${BOOT_ARGS} ${EFI_ARGS} -o "${ISO_OUTPUT}/${ISO_NAME}" "$BUILD_OUTPUT"/
-   RC=$?
-   eend $RC
-
-   # do not continue on errors, otherwise we might generate/overwrite the ISO with dd if=... stuff
-   if [ "$RC" != 0 ] ; then
-     log    "Error: critical error while generating ISO [exit code ${RC}]. Exiting."
-     eerror "Error: critical error while generating ISO [exit code ${RC}]. Exiting." ; eend 1
-     bailout "$RC"
-   fi
-
-   # generate ISO checksums if we are using class 'RELEASE':
-   if hasclass RELEASE && [ "$RC" = 0 ] ; then
-      (
-        if cd "$ISO_OUTPUT" ; then
-          sha256sum "${ISO_NAME}" > "${ISO_NAME}.sha256" && \
-          touch -r "${ISO_NAME}" "${ISO_NAME}.sha256"
-        fi
-      )
-   fi
-
-   if [ "$RC" = 0 ] ; then
-      log   "Finished execution of stage 'iso build' [$(date)]"
-      einfo "Finished execution of stage 'iso build'" ; eend 0
-   else
-      log    "Error: there was a critical error ($RC) executing stage 'iso build' [$(date)]"
-      eerror "Error: there was a critical error executing stage 'iso build'" ; eend 1
-      bailout "$RC"
-   fi
+   log    "Error: there was a critical error ($RC) executing stage 'iso build' [$(date)]"
+   eerror "Error: there was a critical error executing stage 'iso build'" ; eend 1
+   bailout "$RC"
 fi
 # }}}
 
@@ -953,12 +921,6 @@ create_netbootpackage() {
   local OUTPUT_FILE
   OUTPUT_NAME=$(basename "${ISO_NAME}" .iso)-netboot
   OUTPUT_FILE="${NETBOOT}/${OUTPUT_NAME}.tar"
-
-  if [ -n "$SKIP_NETBOOT" ] ; then
-    log   "Skipping stage 'netboot' as requested via option -Q"
-    ewarn "Skipping stage 'netboot' as requested via option -Q" ; eend 0
-    return 0
-  fi
 
   mkdir -p "$NETBOOT"
 

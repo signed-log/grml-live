@@ -12,7 +12,7 @@ Synopsis
 grml-live [-c <classe[s]>] [-C <configfile>] [
 -e <extract_iso_name>] [-g <grml_name>] [-i <iso_name>] [
 -o <output_directory>] [-r <release_name>] [-s <suite>] [
--v <version_number>] [-U <username>] [-w <date>] [-AbBFnNqQRu]
+-v <version_number>] [-U <username>] [-w <date>] [-AbBFqRu]
 
 Description
 -----------
@@ -152,23 +152,6 @@ Specify name of source directory which provides files that should become part of
 the chroot/ISO. Not enabled by default. Note: the files are installed under '/'
 in the chroot so you have to create the rootfs structure on your own.
 
-  -n::
-
-Skip creation of the ISO file. This option is useful if you want to build/update
-the chroot and/or recreate the squashfs file without building an ISO file.
-
-  -N::
-
-Bootstrap the chroot without building bootloader, squashfs, or finalizing the
-ISO. Use this option if installation of some packages fails, you want to run
-custom commands or similar.
-The main use of this option is to save time by skipping stages which aren't
-necessary for bootstrapping the chroot and which would get executed more than
-once when iterating through the initial bootstrapping.
-Alternatively, use this option as a test run of grml-live. Once you are
-satisfied with the state of your grml_chroot, use grml-live **-u** to build the
-remaining stages and finalize the ISO.
-
   -o **OUTPUT_DIRECTORY**::
 
 Main output directory of the build process.  Some directories are created
@@ -181,10 +164,6 @@ chroot system) and grml_isos (where the resulting ISO is stored).
 Build the ISO without (re-)creating the squashfs compressed file using mksquashfs.
 This option is useful if you just want to update parts outside the chroot in the ISO.
 Consider combining this option with the build-only option '-b'.
-
-  -Q::
-
-Build the ISO without generating a netboot package.
 
   -r **RELEASENAME**::
 
