@@ -24,7 +24,6 @@ TOOL_DIR = Path(__file__).parent
 class JobProperties:
     job_timestamp: datetime.datetime
     job_name: str
-    arch: str
     classes: list
     debian_suite: str
     version: str
@@ -107,7 +106,6 @@ def print_grml_live_version(grml_live_path: Path):
 def run_grml_live(
     grml_live_path: Path,
     output_dir: Path,
-    arch: str,
     classes: list,
     debian_suite: str,
     version: str,
@@ -131,8 +129,6 @@ def run_grml_live(
         grml_live_path / "grml-live",
         "-F",  # do not prompt
         "-A",  # cleanup afterwards
-        "-a",
-        arch,
         "-c",
         ",".join(classes),
         "-s",
@@ -263,7 +259,6 @@ def build(
     run_grml_live(
         grml_live_path,
         build_dir,
-        job_properties.arch,
         job_properties.classes,
         job_properties.debian_suite,
         job_properties.version,
@@ -395,6 +390,8 @@ def _main(program_name: str, argv: list[str]) -> int:
         usage(program_name)
         return 2
 
+    # TODO: *ask* grml-live which architecture it will build for, and remove
+    # TODO: the arch parameter.
     if arch not in ("amd64", "arm64"):
         return bail(f"unknown build_arch: {arch}")
 
@@ -438,7 +435,6 @@ def _main(program_name: str, argv: list[str]) -> int:
         job_properties = JobProperties(
             job_timestamp=datetime.datetime.now(),
             job_name=f"{build_grml_name}-release",
-            arch=arch,
             classes=classes,
             # XXX: should load this from ISO or metadata file
             debian_suite=build_config["debian_suite"],
@@ -462,7 +458,6 @@ def _main(program_name: str, argv: list[str]) -> int:
         job_properties = JobProperties(
             job_timestamp=job_timestamp,
             job_name=f"{build_grml_name}-{debian_suite}",
-            arch=arch,
             classes=classes,
             debian_suite=debian_suite,
             version=build_version,

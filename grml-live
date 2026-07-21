@@ -44,7 +44,6 @@ $PN - build process script for generating a (grml based) Linux Live-ISO
 
 Usage: $PN [options, see as follows]
 
-   -a <architecture>       architecture; available values: amd64 + arm64
    -A                      clean build directories before and after running
    -b                      build the ISO without updating the chroot
    -B                      build the ISO without touching the chroot (do not clean up)
@@ -234,9 +233,8 @@ hasclass() {
 # }}}
 
 # command line parsing {{{
-while getopts "a:C:c:d:D:e:g:i:I:o:r:s:U:v:w:AbBFhnNqQRu" opt; do
+while getopts "C:c:d:D:e:g:i:I:o:r:s:U:v:w:AbBFhnNqQRu" opt; do
   case "$opt" in
-    a) ARCH="$OPTARG" ;;
     A) CLEAN_ARTIFACTS=1 ;;
     b) BUILD_ONLY=1 ;;
     B) BUILD_DIRTY=1; SKIP_RELEASE=1 ;;
@@ -333,6 +331,10 @@ if [ -n "$EXTRACT_ISO_NAME" ] ; then
 fi
 # }}}
 
+# setup static build settings {{{
+ARCH="$("$DPKG_BINARY" --print-architecture)"
+# }}}
+
 if [ -n "$SQUASHFS_EXCLUDES_FILE" ] ; then
   eerror "The variable \$SQUASHFS_EXCLUDES_FILE is set, but it is unsupported." ; eend 1
   eerror "Please unset it. Current value: \$SQUASHFS_EXCLUDES_FILE=${SQUASHFS_EXCLUDES_FILE}" ; eend 1
@@ -370,8 +372,7 @@ if [ -n "$SQUASHFS_OPTIONS" ] ; then
 fi
 
 # assume sane defaults (if not set already) {{{
-[ -n "$ARCH" ]                    || ARCH="$("$DPKG_BINARY" --print-architecture)"
-[ -n "$CLASSES" ]                 || CLASSES="GRML_FULL,$(echo "${ARCH}" | tr '[:lower:]' '[:upper:]')"
+[ -n "$CLASSES" ]                 || CLASSES="GRML_FULL"
 [ -n "$DATE" ]                    || DATE="$(date --utc -d "@${SOURCE_DATE_EPOCH}" +%Y-%m-%d)"
 [ -n "$DEFAULT_BOOTOPTIONS" ]     || DEFAULT_BOOTOPTIONS=''
 [ -n "$DISTRI_INFO" ]             || DISTRI_INFO='Grml - Live Linux for system administrators'
@@ -392,18 +393,6 @@ fi
 specify it on the command line using the -c option."
 [ -n "$OUTPUT" ] || bailout 1 "Error: \$OUTPUT unset, please set it in $LIVE_CONF or
 specify it on the command line using the -o option."
-
-if [ "$ARCH" != "amd64" ] && [ "$ARCH" != "arm64" ] ; then
-  eerror "Error: Unsupported ARCH '$ARCH', sorry. Want to support it? Contribute!"
-  eend 1
-  bailout
-fi
-
-if [[ "$(dpkg --print-architecture)" != "arm64" ]] && [[ "$ARCH" == "arm64" ]] ; then
-  eerror "Failure: trying to build for arm64, but not running on arm64."
-  eend 1
-  bailout
-fi
 
 if [ -e "$GRML_FAI_CONFIG"/fai.conf ] ; then
   ewarn "The file ${GRML_FAI_CONFIG}/fai.conf exists but will be ignored."
@@ -468,16 +457,18 @@ if hasclass RELEASE ; then
 elif [[ -z "$SKIP_RELEASE" ]]; then
   CLASSES="${CLASSES},RELEASE"
 fi
+
 if hasclass AMD64 ; then
-  ewarn "Class AMD64 explicitly requested. This is now automatic, please remove it."; eend 1
-elif [[ "$ARCH" == "amd64" ]]; then
-  CLASSES="${CLASSES},AMD64"
+  eerror "Class AMD64 explicitly requested. This is now automatic. Remove it to continue."
+  bailout 1
 fi
 if hasclass ARM64 ; then
-  ewarn "Class ARM64 explicitly requested. This is now automatic, please remove it."; eend 1
-elif [[ "$ARCH" == "arm64" ]]; then
-  CLASSES="${CLASSES},ARM64"
+  eerror "Class ARM64 explicitly requested. This is now automatic. Remove it to continue."
+  bailout 1
 fi
+
+# Add architecture-specific class now.
+CLASSES="${CLASSES},$(echo "${ARCH}" | tr '[:lower:]' '[:upper:]')"
 # }}}
 
 # Warn user if addons from grml-live-addons are absent {{{
@@ -502,7 +493,7 @@ echo "  SOURCE_DATE_EPOCH: $SOURCE_DATE_EPOCH"
 [ -n "$WAYBACK_DATE" ]        && echo "  Wayback date:      $WAYBACK_DATE"
 [ -n "$VERSION" ]             && echo "  Grml version:      $VERSION"
 [ -n "$SUITE" ]               && echo "  Debian suite:      $SUITE"
-[ -n "$ARCH" ]                && echo "  Architecture:      $ARCH"
+echo "  Architecture:      $ARCH"
 [ -n "$SECURE_BOOT" ]         && echo "  Secure Boot:       $SECURE_BOOT"
 [ -n "$CHROOT_INSTALL" ]      && echo "  Install files from directory to chroot:  $CHROOT_INSTALL"
 [ -n "$BOOTID" ]              && echo "  Boot identifier:   $BOOTID"
@@ -674,26 +665,6 @@ case "${SUITE}" in
           *)               CLASSES="DEBIAN_$(echo "$SUITE" | tr '[:lower:]' '[:upper:]'),$CLASSES";;
 esac
 export SUITE # make sure it's available in FAI scripts
-
-# validate whether the specified architecture class matches the
-# architecture (option), otherwise installation of kernel will fail
-if hasclass AMD64 ; then
-   if ! [[ "$ARCH" == "amd64" ]] ; then
-      log    "Error: You specified the AMD64 class but are trying to build something else (ARM64?)."
-      eerror "Error: You specified the AMD64 class but are trying to build something else (ARM64?)."
-      eerror "Tip:   Either invoke grml-live with '-a amd64' or adjust the architecture class. Exiting."
-      eend 1
-      bailout
-   fi
-elif hasclass ARM64 ; then
-   if ! [[ "$ARCH" == "arm64" ]] ; then
-      log    "Error: You specified the ARM64 class but are trying to build something else (AMD64?)."
-      eerror "Error: You specified the ARM64 class but are trying to build something else (AMD64?)."
-      eerror "Tip:   Either invoke grml-live with '-a arm64' or adjust the architecture class. Exiting."
-      eend 1
-      bailout
-   fi
-fi
 
 if [[ -n "${BOOT_METHOD:-}" ]] ; then
   log    "Error: You specified the unsupported BOOT_METHOD option. Please unset it."

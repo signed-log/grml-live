@@ -9,7 +9,7 @@ grml-live - build framework for the Grml Live Linux system
 Synopsis
 --------
 
-grml-live [-a <architecture>] [-c <classe[s]>] [-C <configfile>] [
+grml-live [-c <classe[s]>] [-C <configfile>] [
 -e <extract_iso_name>] [-g <grml_name>] [-i <iso_name>] [
 -o <output_directory>] [-r <release_name>] [-s <suite>] [
 -v <version_number>] [-U <username>] [-w <date>] [-AbBFnNqQRu]
@@ -53,11 +53,6 @@ Options
 
 Clean up all output directories before running the build process. After finishing,
 clean up the Chroot target and Build target directories.
-
-  -a **ARCHITECTURE**::
-
-Use the specified architecture instead of the auto-detected one.
-Currently supported values: amd64 and arm64.
 
   -b::
 
@@ -510,7 +505,6 @@ Adjust grml-live configuration for our needs:
   # CHROOT_INSTALL="/srv/config/chroot_install"
   ## adjust if necessary (defaults to ./grml/):
   ## OUTPUT="/srv/grml-live"
-  # ARCH="amd64"
   CLASSES="GRML_FULL"
   EOF
 
@@ -717,7 +711,7 @@ Usage example:
     $ git clone --depth 1 https://github.com/grml/grml-live
     $ cd grml-live
     $ sudo apt install <packages>  # see debian/control
-    $ sudo GRML_FAI_CONFIG=$PWD/config ./grml-live -s sid -a amd64 -c GRML_FULL
+    $ sudo GRML_FAI_CONFIG=$PWD/config ./grml-live -s sid -c GRML_FULL
 
 
 Debian package
