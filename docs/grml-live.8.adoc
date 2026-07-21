@@ -12,8 +12,7 @@ Synopsis
 grml-live [-a <architecture>] [-c <classe[s]>] [-C <configfile>] [
 -e <extract_iso_name>] [-g <grml_name>] [-i <iso_name>] [
 -o <output_directory>] [-r <release_name>] [-s <suite>] [
--t <arg>] [-v <version_number>] [-U <username>] [
--w <date>] [-AbBFnNqQRuVz]
+-v <version_number>] [-U <username>] [-w <date>] [-AbBFnNqQRuz]
 
 Description
 -----------
@@ -211,10 +210,6 @@ Specify the Debian suite you want to use for your live-system. If unset defaults
 to "testing". Supported values are: stable, testing, unstable (or their
 corresponding release names like "trixie").
 
-  -t **arg**::
-
-Deprecated. Will be removed in a future release of grml-live.
-
   -u::
 
 Update existing chroot instead of rebuilding it from scratch..
@@ -226,10 +221,6 @@ Sets ownership of all build output files to specified username before exiting.
   -v **VERSION_NUMBER**::
 
 Specify version number of the release.
-
-  -V::
-
-Deprecated. Will be removed in a future release of grml-live.
 
   -w **DATE**::
 
