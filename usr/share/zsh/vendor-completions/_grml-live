@@ -24,7 +24,6 @@ _grmllive_archs() { #{{{
 
   runningarch="$(dpkg --print-architecture)"
   archs=( ${runningarch} )
-  [[ ${runningarch} == 'amd64' ]] && archs=( ${archs} 'i386')
   _wanted list expl 'target architecture' compadd ${expl} -- ${archs}
 }
 #}}}

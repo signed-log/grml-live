@@ -338,28 +338,6 @@ man-db
 lolcat
 toilet
 
-PACKAGES install I386
-# kernel related
-linux-image-686
-linux-cpupower
-# disk subsystems support/debugging, I386/AMD64 specific
-cciss-vol-status
-# x86 hardware support
-cmospwd
-cpuid
-memtest86+
-# broken userland debugging
-ltrace
-
-# PXE boot
-grml-terminalserver
-
-# firmware updates
-fwupd-i386-signed
-
-# X - not relevant on more recent systems, so ship on i386 only
-xserver-xorg-video-intel
-
 PACKAGES install AMD64
 # kernel related
 linux-image-amd64
