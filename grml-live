@@ -336,6 +336,11 @@ if [ -z "$SKIP_MKISOFS" ] && ! type "$XORRISO_BINARY" >/dev/null 2>&1 ; then
   bailout
 fi
 
+if [ -n "$SQUASHFS_EXCLUDES_FILE" ] ; then
+  eerror "The variable \$SQUASHFS_EXCLUDES_FILE is set, but it is unsupported." ; eend 1
+  eerror "Please unset it. Current value: \$SQUASHFS_EXCLUDES_FILE=${SQUASHFS_EXCLUDES_FILE}" ; eend 1
+  bailout
+fi
 if [ -n "$BUILD_OUTPUT" ] ; then
   eerror "The variable \$BUILD_OUTPUT is set, but it is unsupported." ; eend 1
   eerror "Please unset it. Current value: \$BUILD_OUTPUT=${BUILD_OUTPUT}" ; eend 1
@@ -380,7 +385,6 @@ fi
 [ -n "$OUTPUT" ]                  || OUTPUT="$PWD/grml/"
 [ -n "$RELEASENAME" ]             || RELEASENAME='grml-live rocks'
 [ -n "$SECURE_BOOT" ]             || SECURE_BOOT='disable'
-[ -n "$SQUASHFS_EXCLUDES_FILE" ]  || SQUASHFS_EXCLUDES_FILE="${GRML_FAI_CONFIG}/grml/squashfs-excludes"
 [ -n "$SUITE" ]                   || SUITE='testing'
 [ -n "$USERNAME" ]                || USERNAME='grml'
 [ -n "$VERSION" ]                 || VERSION='0.0.1'
@@ -837,10 +841,8 @@ else
    # 2) prevents unpacking errors in a later build-only step in containers not supporting xattrs.
    SQUASHFS_OPTIONS="$SQUASHFS_OPTIONS -no-xattrs"
 
-   # support exclusion of files via exclude-file:
-   if [ -n "${SQUASHFS_EXCLUDES_FILE}" ] && [ -r "${SQUASHFS_EXCLUDES_FILE}" ] ; then
-     SQUASHFS_OPTIONS="${SQUASHFS_OPTIONS} -wildcards -ef ${SQUASHFS_EXCLUDES_FILE}"
-   fi
+   # Static file exclusion list.
+   SQUASHFS_OPTIONS="${SQUASHFS_OPTIONS} -wildcards -ef ${GRML_FAI_CONFIG}/grml/squashfs-excludes"
 
    # log stuff
    SQUASHFS_STDERR="$(mktemp -t grml-live.XXXXXX)"
