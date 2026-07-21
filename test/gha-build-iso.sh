@@ -30,7 +30,7 @@ run_build() {
         bash -c \
         "apt-get update -qq && apt-get satisfy -q -y --no-install-recommends 'git, ca-certificates' \
         && git config --global --add safe.directory /source \
-        && /source/build-driver/build /source ${build_mode} /source/${config_filename} ghaci $ARCH testing"
+        && /source/build-driver/build /source ${build_mode} /source/${config_filename} ghaci $ARCH trixie"
 
     sudo chmod -R a+rX results
     sudo mv results "${results_directory}"
@@ -49,7 +49,7 @@ elif [ "$MODE" = "build-only-twice" ]; then
     cat >build-gha-ci-test-config-build-only-first <<EOT
 ---
 last_release: "2024.12"
-debian_suite: testing
+debian_suite: trixie
 release_version: "${GITHUB_PR_NUMBER:+pr$GITHUB_PR_NUMBER-}ci1"
 release_name: "${GITHUB_PR_NUMBER:+PR$GITHUB_PR_NUMBER }CI1"
 base_iso:
@@ -63,7 +63,7 @@ EOT
     cat >build-gha-ci-test-config-build-only-second <<EOT
 ---
 last_release: "2024.12"
-debian_suite: testing
+debian_suite: trixie
 release_version: "${GITHUB_PR_NUMBER:+pr$GITHUB_PR_NUMBER-}ci2"
 release_name: "${GITHUB_PR_NUMBER:+PR$GITHUB_PR_NUMBER }CI2"
 base_iso:
