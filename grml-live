@@ -378,7 +378,6 @@ fi
 [ -n "$GRML_NAME" ]               || GRML_NAME='grml'
 [ -n "$HOSTNAME" ]                || HOSTNAME='grml'
 [ -n "$NO_ADDONS" ]               || NO_ADDONS=''
-[ -n "$NO_BOOTID" ]               || NO_BOOTID=''
 [ -n "$OUTPUT" ]                  || OUTPUT="$PWD/grml/"
 [ -n "$RELEASENAME" ]             || RELEASENAME='grml-live rocks'
 [ -n "$SECURE_BOOT" ]             || SECURE_BOOT='disable'
@@ -507,7 +506,6 @@ echo "  SOURCE_DATE_EPOCH: $SOURCE_DATE_EPOCH"
 [ -n "$SECURE_BOOT" ]         && echo "  Secure Boot:       $SECURE_BOOT"
 [ -n "$CHROOT_INSTALL" ]      && echo "  Install files from directory to chroot:  $CHROOT_INSTALL"
 [ -n "$BOOTID" ]              && echo "  Boot identifier:   $BOOTID"
-[ -n "$NO_BOOTID" ]           && echo "  Skipping bootid feature."
 [ -n "$CHOWN_USER" ]          && echo "  Output owner:      $CHOWN_USER"
 [ -n "$DEFAULT_BOOTOPTIONS" ] && echo "  Adding default bootoptions: \"$DEFAULT_BOOTOPTIONS\""
 [ -n "$LOGFILE" ]             && echo "  Logging to file:   $LOGFILE"
@@ -557,12 +555,8 @@ SQUASHFS_NAME20="$(extend_string_end 20 "$SQUASHFS_NAME20")"
 # shellcheck disable=SC2034 # Calculated just to write it into CONFIGDUMP.
 BOOT_FILE="/conf/bootfile_${SHORT_NAME}_${SOURCE_DATE_EPOCH}"
 
-if [ -n "$NO_BOOTID" ] ; then
-  BOOTID=""
-else
-  if [ -z "$BOOTID" ] ; then
-    BOOTID=$(echo "${GRML_NAME}${VERSION}" | tr -d ',./;\- ')
-  fi
+if [ -z "$BOOTID" ] ; then
+  BOOTID=$(echo "${GRML_NAME}${VERSION}" | tr -d ',./;\- ')
 fi
 
 BUILD_OUTPUT="${OUTPUT}/grml_cd"
@@ -624,7 +618,7 @@ einfo "Logging actions to logfile $LOGFILE"
 # dump config variables into file, for hooks/scripts access {{{
 CONFIGDUMP=$(mktemp)
 set | grep -E \
-  '^(GRML_NAME|SHORT_NAME|RELEASENAME|RELEASE_INFO|RELEASE_INFO68|DATE|VERSION|SUITE|ARCH|DISTRI_INFO|DISTRI_NAME|SQUASHFS_NAME|SQUASHFS_NAME20|USERNAME|HOSTNAME|APT_PROXY|BUILD_ONLY|BOOTSTRAP_ONLY|WAYBACK_DATE|GRML_LIVE_DEBUG_APT|GRML_FAI_CONFIG|SOURCE_DATE_EPOCH|NO_BOOTID|BOOTID|BOOT_FILE|DEFAULT_BOOTOPTIONS|SECURE_BOOT|NO_ADDONS)=' \
+  '^(GRML_NAME|SHORT_NAME|RELEASENAME|RELEASE_INFO|RELEASE_INFO68|DATE|VERSION|SUITE|ARCH|DISTRI_INFO|DISTRI_NAME|SQUASHFS_NAME|SQUASHFS_NAME20|USERNAME|HOSTNAME|APT_PROXY|BUILD_ONLY|BOOTSTRAP_ONLY|WAYBACK_DATE|GRML_LIVE_DEBUG_APT|GRML_FAI_CONFIG|SOURCE_DATE_EPOCH|BOOTID|BOOT_FILE|DEFAULT_BOOTOPTIONS|SECURE_BOOT|NO_ADDONS)=' \
   > "${CONFIGDUMP}"
 # }}}
 
