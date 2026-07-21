@@ -67,12 +67,9 @@ Usage: $PN [options, see as follows]
    -r <release_name>       release name
    -R                      skip applying RELEASE clean up
    -s <suite>              Debian suite/release, like: stable, testing, unstable
-   -S <arg>                deprecated - will be removed from grml-live
-   -t <arg>                deprecated - will be removed from grml-live
    -u                      update existing chroot instead of rebuilding it from scratch
    -U <username>           arrange output to be owned by specified username
    -v <version_number>     specify version number of the release
-   -V                      deprecated - will be removed from grml-live
    -w <date>               wayback machine, build system using Debian archives
                            from specified date
    -z                      use ZLIB instead of LZMA/XZ compression
@@ -261,13 +258,10 @@ while getopts "a:C:c:d:D:e:g:i:I:o:r:s:S:t:U:v:w:AbBFhnNqQRuVz" opt; do
     r) RELEASENAME="$OPTARG" ;;
     R) SKIP_RELEASE=1 ;;
     s) SUITE="$OPTARG" ;;
-    S) echo "grml-live option -S is deprecated, please remove it." ;;
-    t) echo "grml-live option -t is deprecated, please remove it." ;;
     v) VERSION="$OPTARG" ;;
     F) FORCE=1 ;;
     u) UPDATE=1 ;;
     U) CHOWN_USER="$OPTARG" ;;
-    V) echo "grml-live option -V is deprecated, please remove it." ;;
     w) export WAYBACK_DATE="$OPTARG" ;;
     z) SQUASHFS_ZLIB=1 ;;
     ?) echo "invalid option -$OPTARG" >&2; usage; bailout 1 ;;
