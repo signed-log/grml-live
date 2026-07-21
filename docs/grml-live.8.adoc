@@ -12,7 +12,7 @@ Synopsis
 grml-live [-a <architecture>] [-c <classe[s]>] [-C <configfile>] [
 -e <extract_iso_name>] [-g <grml_name>] [-i <iso_name>] [
 -o <output_directory>] [-r <release_name>] [-s <suite>] [
--v <version_number>] [-U <username>] [-w <date>] [-AbBFnNqQRuz]
+-v <version_number>] [-U <username>] [-w <date>] [-AbBFnNqQRu]
 
 Description
 -----------
@@ -238,9 +238,6 @@ Debian repositories only, as referred to in /etc/apt/sources.list.d/debian.list
 (so neither the Grml repositories nor any further custom ones are affected by
 the wayback machine).
 
-  -z::
-
-Use ZLIB instead of LZMA/XZ compression in mksquashfs part of the build process.
 
 [[usage-examples]]
 Usage examples
@@ -513,9 +510,6 @@ Make a branch for your customizations:
 Adjust grml-live configuration for our needs:
 
   cat > ./etc/grml/grml-live.local << EOF
-  ## want a faster build process and don't need smaller ISOs?
-  ## if so use zlib compression
-  # SQUASHFS_OPTIONS="-comp gzip -b 256k"
   ## install local files into the chroot
   # CHROOT_INSTALL="/srv/config/chroot_install"
   ## adjust if necessary (defaults to ./grml/):
