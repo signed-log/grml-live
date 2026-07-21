@@ -29,7 +29,6 @@ class FaiScriptFailed(Exception):
 
 
 class FaiAction(StrEnum):
-    BOOTSTRAP = "bootstrap"
     DIRINSTALL = "dirinstall"
     SOFTUPDATE = "softupdate"
     RECONFIGURE = "reconfigure"
@@ -836,10 +835,7 @@ def _main(program_name: str, argv: list[str]) -> int:
     rc = 0
 
     try:
-        if args.action == FaiAction.BOOTSTRAP:
-            install_base(conf_dir, chroot_dir, classes, args.debian_suite, args.mirror_url)
-            skiptasks = ["configure"]
-        elif args.action == FaiAction.DIRINSTALL:
+        if args.action == FaiAction.DIRINSTALL:
             install_base(conf_dir, chroot_dir, classes, args.debian_suite, args.mirror_url)
         elif args.action == FaiAction.SOFTUPDATE:
             pass
