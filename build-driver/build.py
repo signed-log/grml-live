@@ -395,7 +395,7 @@ def _main(program_name: str, argv: list[str]) -> int:
         usage(program_name)
         return 2
 
-    if arch not in ("amd64", "i386", "arm64"):
+    if arch not in ("amd64", "arm64"):
         return bail(f"unknown build_arch: {arch}")
 
     if not is_ci():

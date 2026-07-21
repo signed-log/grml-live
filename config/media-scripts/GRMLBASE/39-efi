@@ -30,7 +30,7 @@ grub_setup() {
   EFI_IMG="/boot/efi.img"
 
   local efi_size
-  if [[ "${SECURE_BOOT:-}" == "disable" ]] || [[ "${ARCH:-}" == "i386" ]] ; then
+  if [[ "${SECURE_BOOT:-}" == "disable" ]] ; then
     efi_size='4M'
   else
     # e.g. EFI/debian for Secure Boot has >4MB and needs more space
@@ -123,19 +123,6 @@ grub_setup() {
           ;;
       esac
     fi
-  fi
-
-  if [[ "$ARCH" == "i386" ]] ; then
-    BOOTX32="/boot/bootia32.efi"
-    if ! [ -r "${target}/${BOOTX32}" ] ; then
-      echo "E: Cannot access GRUB 32-bit PC EFI image ${target}/${BOOTX32}." >&2
-      echo "W: Possible reason is failure to run ${GRML_FAI_CONFIG}/media-scripts/GRMLBASE/31-grub" >&2
-      exit 50
-    fi
-
-    create_efi_img "${target}/${EFI_IMG}" "${efi_size}"
-    mcopy -i "${target}/${EFI_IMG}" "${target}/${BOOTX32}" ::EFI/BOOT/bootia32.efi >/dev/null || exit 53
-    echo "I: Created 32-bit PC EFI image $EFI_IMG from $BOOTX32"
   fi
 }
 # }}}

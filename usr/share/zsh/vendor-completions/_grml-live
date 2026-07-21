@@ -11,9 +11,9 @@ _grmllive_flavours() { #{{{
   local -a flavours
 
   flavours=(
-    grml        grml64
-    grml-full   grml64-full
-    grml-small  grml64-small
+    grml
+    grml-full
+    grml-small
   )
   _wanted list expl 'grml flavour(s)' compadd ${expl} -- ${flavours}
 }
@@ -24,7 +24,6 @@ _grmllive_archs() { #{{{
 
   runningarch="$(dpkg --print-architecture)"
   archs=( ${runningarch} )
-  [[ ${runningarch} == 'amd64' ]] && archs=( ${archs} 'i386')
   _wanted list expl 'target architecture' compadd ${expl} -- ${archs}
 }
 #}}}
@@ -35,7 +34,7 @@ _grmllive_classes() { #{{{
     static_classes=(
         DEBORPHAN FRESHCLAM
         GRML_FULL GRML_SMALL
-        LATEX LATEX_CLEANUP LOCALES NO_ONLINE REMOVE_DOCS SOURCES XORG ZFS
+        LATEX LOCALES NO_ONLINE REMOVE_DOCS SOURCES XORG ZFS
     )
     compset -P '*,'
     already=(${(s<,>)IPREFIX})
@@ -90,13 +89,9 @@ arguments=( #{{{
   '-Q[skip netboot package build]'
   '-r[release name]:release name:'
   '-s[debian suite to be used for live-system]:Debian suite:_grmllive_suites'
-  '-S[place of scripts (defaults to /usr/share/grml-live/scripts)]:script directory:_path_files -/'
-  '-t[template directory]:template directory:_path_files -/'
   '-u[update existing chroot instead of rebuilding it from scratch]'
   '-U[arrange output to be owned by specified username]'
-  '-V[increase verbosity]'
   '-w[wayback machine, build system using Debian archives from specified date]:wayback date(s):_grmllive_apt_snapshot_dates'
-  '-z[use ZLIB instead of LZMA/XZ compression]'
 )
 #}}}
 

@@ -77,13 +77,6 @@ wireless-regdb
 libpam-systemd
 systemd-container
 
-PACKAGES install I386
-grub-pc
-grub-efi-amd64-bin
-grub-efi-ia32-bin
-pxelinux
-syslinux syslinux-common syslinux-utils
-
 PACKAGES install AMD64
 grub-pc
 grub-efi-amd64-bin

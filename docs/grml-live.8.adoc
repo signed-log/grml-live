@@ -56,12 +56,8 @@ clean up the Chroot target and Build target directories.
 
   -a **ARCHITECTURE**::
 
-Use the specified architecture instead of the currently running one.  This
-allows building a 32bit system on a 64bit host (though you can't build a 64bit
-system on a 32bit system/kernel of course). Please notice that real
-crosscompiling (like building a ppc system on x86) isn't possible due to the
-nature and the need of working in a chroot. Currently supported values: i386,
-amd64 and arm64.
+Use the specified architecture instead of the auto-detected one.
+Currently supported values: amd64 and arm64.
 
   -b::
 
@@ -271,7 +267,7 @@ and strength without losing the simplicity in the build process.
 
 The main and base class provided by grml-live is named GRMLBASE. grml-live will
 automatically add it, together with the architecture-dependent class (being
-'I386' for x86_32, 'AMD64' for x86_64 and 'ARM64' for arm64).
+'AMD64' for x86_64 and 'ARM64' for arm64).
 The GRML_SMALL and GRML_FULL classes define the official ISO builds.
 
 The following files and directories are relevant for class GRMLBASE by default:
@@ -638,8 +634,8 @@ Make sure apt-cacher-ng is running ('/etc/init.d/apt-cacher-ng restart').
 That's it.  All downloaded files will be cached in /var/cache/apt-cacher-ng then.
 
 [[create-a-base-tgz]]
-How do I create a base tar.gz (I386.tar.gz or AMD64.tar.gz or ARM64.tar.gz)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+How do I create a base tar.gz (AMD64.tar.gz or ARM64.tar.gz)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [[basetgz]]
 
 This is no longer supported. grml-live will call mmdebstrap for you.
