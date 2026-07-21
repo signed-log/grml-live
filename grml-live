@@ -234,7 +234,7 @@ hasclass() {
 # }}}
 
 # command line parsing {{{
-while getopts "a:C:c:d:D:e:g:i:I:o:r:s:S:t:U:v:w:AbBFhnNqQRuVz" opt; do
+while getopts "a:C:c:d:D:e:g:i:I:o:r:s:U:v:w:AbBFhnNqQRu" opt; do
   case "$opt" in
     a) ARCH="$OPTARG" ;;
     A) CLEAN_ARTIFACTS=1 ;;
