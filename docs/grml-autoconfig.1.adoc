@@ -27,16 +27,10 @@ system pointed to by the myconfig boot parameter.
 
 The DCS handling is controlled by a number of boot parameters.
 
-The scripts save-config and restore-config can be used to create and handle
-files called 'grml configuration archive', abbreviated GCA. save-config stores
-the running configuration inside a GCA; restore-config is a script to restore a
-configuration from a GCA.
-
 [TIP]
 A GCA is a plain bzip2 compressed tar archive. All the files are generated
 starting from the root-directory '/' so it is easy to handle. You can generate
-configuration archives manually as well. save-config is just a frontend which
-should make it easier to use.
+configuration archives manually as well.
 
 [IMPORTANT]
 Starting with Grml release 2009.05 its possible to use root persistency on grml.
@@ -50,51 +44,6 @@ include::grml-autoconfig.current.txt[]
 [[X7]]
 Usage scenarios
 ---------------
-
-Personal configuration files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You are a fan of the editor vim? Great. You probably have your own ~/.vimrc and
-want to use it on the Grml system. You also don't like the default zsh
-configuration and want to use your own ~/.zshrc?  How to proceed? Copy your
-.vimrc and .zshrc to $HOME of user 'grml'.  Place additional files in
-$HOME/config. Now create a configuration for your files running:
-
-  save-config -home -configdir
-
-Now you should have a file named config.tbz containing your configuration files.
-You can copy the archive to a webserver and restore it via downloading during
-reboot using the following commandline on bootprompt:
-
-  grml netconfig=server.tld/path/to/config.tbz
-
-You don't have network access but own a USB device? Copy the file to a USB
-device and boot with something like:
-
-  grml myconfig=/dev/sda1
-
-Network configuration
-~~~~~~~~~~~~~~~~~~~~~
-
-You need a specific network setup and want to use your own
-/etc/network/interfaces by default? Generate the configuration archive running
-the following command as user root:
-
-  save-config -etc
-
-Now you should have a file named config.tbz containing your configuration files.
-If you want to use it with a USB device copy the file to it and boot via
-using the following command on boot prompt:
-
-  grml myconfig=/dev/sda1
-
-You do have an existing harddisk installation and want to use its configuration?
-Let's say the Debian system is located in /dev/sda2. You want to use the
-directory /etc/network. This directory is activated by default in
-/etc/grml/partconf so we don't have to do any further work.  We just need to
-activate it via using the following commandline on bootprompt:
-
-  grml partconf=/dev/sda2
 
 Automatic installation of debian packages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -154,9 +103,8 @@ example FAT provides this through: 'mkfs.vfat -n GRMLCFG /dev/sda1' (attention:
 this will destroy data on /dev/sda1 of course!). Take a look at the
 documentation/manpage of the filesystem you want to use.
 
-Now place your configuration archive (see save-config and the other
-usage scenarios) and the script grml.sh on the device. Now you can boot
-your system without specifying any boot parameters on bootprompt because
+Now place your configuration archive and the script grml.sh on the device. Then
+you can boot your system without specifying any boot parameters, because
 devices labeled with GRMLCFG are mounted readonly and used by default.
 If you did not label your device you can use the device anyway using
 'grml myconfig=/dev/sdX' (adjust /dev/sdX) on the bootprompt.
@@ -192,7 +140,7 @@ about how to report bugs.
 
 See also
 --------
-grml-autoconfig(8), restore-config(1), save-config(1)
+grml-autoconfig(8)
 
 Author
 ------
