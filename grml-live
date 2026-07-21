@@ -377,7 +377,6 @@ fi
 [ -n "$GRML_FAI_CONFIG" ]         || GRML_FAI_CONFIG='/usr/share/grml-live/config'
 [ -n "$GRML_NAME" ]               || GRML_NAME='grml'
 [ -n "$HOSTNAME" ]                || HOSTNAME='grml'
-[ -n "$NO_ADDONS" ]               || NO_ADDONS=''
 [ -n "$OUTPUT" ]                  || OUTPUT="$PWD/grml/"
 [ -n "$RELEASENAME" ]             || RELEASENAME='grml-live rocks'
 [ -n "$SECURE_BOOT" ]             || SECURE_BOOT='disable'
@@ -481,7 +480,7 @@ fi
 # }}}
 
 # Warn user if addons from grml-live-addons are absent {{{
-if [ -z "${NO_ADDONS:-}" ] && [ ! -r "$GRML_FAI_CONFIG"/media-files/GRMLBASE/addons/arch ] ; then
+if [ ! -r "$GRML_FAI_CONFIG"/media-files/GRMLBASE/addons/arch ] ; then
   ewarn "Boot addons not found (Consider installing package grml-live-addons)" ; eend 0
 fi
 # }}}
@@ -517,7 +516,6 @@ else
     [ -n "$SKIP_MKSQUASHFS" ]     && echo "  Skipping creation of SQUASHFS file."
     [ -n "$SKIP_NETBOOT" ]        && echo "  Skipping creation of NETBOOT package."
     [ -n "$SKIP_MKISOFS" ]        && echo "  Skipping creation of ISO file."
-    [ -n "$NO_ADDONS" ]           && echo "  Skipping boot addons."
     [ -n "$BUILD_ONLY" ]          && echo "  Executing BUILD_ONLY instead of fresh installation or UPDATE."
     [ -n "$BUILD_DIRTY" ]         && echo "  Executing BUILD_DIRTY to leave chroot untouched."
 fi
@@ -618,7 +616,7 @@ einfo "Logging actions to logfile $LOGFILE"
 # dump config variables into file, for hooks/scripts access {{{
 CONFIGDUMP=$(mktemp)
 set | grep -E \
-  '^(GRML_NAME|SHORT_NAME|RELEASENAME|RELEASE_INFO|RELEASE_INFO68|DATE|VERSION|SUITE|ARCH|DISTRI_INFO|DISTRI_NAME|SQUASHFS_NAME|SQUASHFS_NAME20|USERNAME|HOSTNAME|APT_PROXY|BUILD_ONLY|BOOTSTRAP_ONLY|WAYBACK_DATE|GRML_LIVE_DEBUG_APT|GRML_FAI_CONFIG|SOURCE_DATE_EPOCH|BOOTID|BOOT_FILE|DEFAULT_BOOTOPTIONS|SECURE_BOOT|NO_ADDONS)=' \
+  '^(GRML_NAME|SHORT_NAME|RELEASENAME|RELEASE_INFO|RELEASE_INFO68|DATE|VERSION|SUITE|ARCH|DISTRI_INFO|DISTRI_NAME|SQUASHFS_NAME|SQUASHFS_NAME20|USERNAME|HOSTNAME|APT_PROXY|BUILD_ONLY|BOOTSTRAP_ONLY|WAYBACK_DATE|GRML_LIVE_DEBUG_APT|GRML_FAI_CONFIG|SOURCE_DATE_EPOCH|BOOTID|BOOT_FILE|DEFAULT_BOOTOPTIONS|SECURE_BOOT)=' \
   > "${CONFIGDUMP}"
 # }}}
 

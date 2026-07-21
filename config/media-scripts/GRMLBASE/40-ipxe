@@ -14,11 +14,6 @@ target=${target:?}
 # shellcheck source=/dev/null
 . "$GRML_LIVE_CONFIG"
 
-if [ -n "$NO_ADDONS" ] ; then
-  echo "I: skipping ipxe installation as \$NO_ADDONS is set."
-  exit 0
-fi
-
 echo "I: installing ipxe."
 
 media_dir="${target}/${GRML_LIVE_MEDIADIR}"
