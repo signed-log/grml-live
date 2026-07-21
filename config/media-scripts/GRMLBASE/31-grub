@@ -14,6 +14,83 @@ target=${target:?}
 # shellcheck source=/dev/null
 . "$GRML_LIVE_CONFIG"
 
+GRUB_ARCHS=()
+declare -A ADDITIONAL_MODULES
+
+if ifclass ARM64 ; then
+  if [ -r "${target}"/usr/lib/grub/arm64-efi/moddep.lst ] ; then
+    GRUB_ARCHS=(arm64-efi)
+    ADDITIONAL_MODULES[arm64-efi]="efi_gop"
+  else
+    echo "/usr/lib/grub/arm64-efi/moddep.lst could not be found, skipping."
+    echo "NOTE: grub-efi-arm64-bin not installed?"
+  fi
+fi
+
+if ifclass AMD64 ; then
+  if [ -r "${target}"/usr/lib/grub/x86_64-efi/moddep.lst ] ; then
+    GRUB_ARCHS+=(x86_64-efi)
+    ADDITIONAL_MODULES[x86_64-efi]="efi_gop"
+  else
+    echo "/usr/lib/grub/x86_64-efi/moddep.lst could not be found, skipping."
+    echo "NOTE: grub-efi-amd64-bin not installed?"
+  fi
+fi
+
+# note: enabled also on AMD64 for UEFI 32bit boot support
+if ifclass I386 || ifclass AMD64 ; then
+  if [ -r "${target}"/usr/lib/grub/i386-efi/moddep.lst ] ; then
+    GRUB_ARCHS+=(i386-efi)
+    ADDITIONAL_MODULES[i386-efi]="efi_gop"
+  else
+    echo "/usr/lib/grub/i386-efi/moddep.lst could not be found, skipping."
+    echo "NOTE: grub-efi-ia32 not installed?"
+  fi
+
+  # i386-pc for BIOS boot
+  if [ -r "${target}"/usr/lib/grub/i386-pc/moddep.lst ] ; then
+    GRUB_ARCHS+=(i386-pc)
+    ADDITIONAL_MODULES[i386-pc]="biosdisk"
+  else
+    echo "ERROR: /usr/lib/grub/i386-pc/moddep.lst could not be found. grub-pc-bin not installed?" >&2
+    exit 1
+  fi
+fi
+
+# BOOT_FILE is set by grml-live.
+tmp_config="/tmp/grub_config_efi"
+cat > "${target}/${tmp_config}" <<EOF
+search.file ${BOOT_FILE} root
+set prefix=(\$root)/boot/grub
+insmod normal
+normal
+echo "E: Could not find root device (for ${BOOT_FILE})!"
+EOF
+
+for grub_arch in "${GRUB_ARCHS[@]}" ; do
+  filename=''
+  case "$grub_arch" in
+    x86_64-efi) filename=/boot/bootx64.efi   ;;
+    i386-efi)   filename=/boot/bootia32.efi  ;;
+    arm64-efi)  filename=/boot/bootaa64.efi  ;;
+    i386-pc)    filename=/boot/grub/i386-pc/core.img  ;;
+  esac
+
+  # Create directory for i386-pc if needed
+  if [ "$grub_arch" = "i386-pc" ] ; then
+    mkdir -p "${target}/boot/grub/i386-pc"
+  fi
+
+  read -r -a modules <<< "${ADDITIONAL_MODULES[$grub_arch]}"
+  $ROOTCMD grub-mkimage -O "$grub_arch" -o "$filename" --prefix=/boot/grub/ --config="$tmp_config" \
+    echo iso9660 part_msdos search_fs_file test \
+    fat ext2 xfs btrfs zfs zfscrypt squash4 part_gpt lvm \
+    "${modules[@]}"
+done
+
+rm -f "${target}/${tmp_config}"
+
+
 media_dir="${target}/${GRML_LIVE_MEDIADIR}"
 tftpboot_dir="${target}/${GRML_LIVE_NETBOOTDIR}"/tftpboot
 mkdir -p "${media_dir}/boot/grub" "${tftpboot_dir}"
@@ -122,7 +199,7 @@ if ifclass AMD64 ; then
   echo "I: Copying GRUB i386-pc modules to ISO"
   mkdir -p "${media_dir}"/boot/grub/i386-pc
 
-  # Copy core.img created by 45-grub-images
+  # Copy core.img created above
   echo "I: Copying GRUB core.img for BIOS boot"
   cp --preserve=timestamp "${target}"/boot/grub/i386-pc/core.img "${media_dir}"/boot/grub/i386-pc/
 
