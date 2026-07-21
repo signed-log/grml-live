@@ -581,16 +581,11 @@ fi
 
 # create log file {{{
 [ -n "$LOGFILE" ] || LOGFILE=${LOG_OUTPUT}/grml-live.log
+rm -f "$LOGFILE"
 mkdir -p "$(dirname "${LOGFILE}")"
 touch "$LOGFILE"
 chown root:adm "$LOGFILE"
 chmod 664 "$LOGFILE"
-if [ -n "$PRESERVE_LOGFILE" ] ; then
-   echo "Preserving logfile $LOGFILE as requested via \$PRESERVE_LOGFILE"
-else
-   # make sure it is empty
-   echo -n > "$LOGFILE"
-fi
 # }}}
 
 # source config and startup {{{
