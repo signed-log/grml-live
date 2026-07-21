@@ -309,32 +309,29 @@ fi
 export SOURCE_DATE_EPOCH
 # }}}
 
-# find programs
-[ -n "$DPKG_BINARY" ]             || DPKG_BINARY='dpkg'
-if ! type "$DPKG_BINARY" >/dev/null 2>&1 ; then
-  eerror "Error: $DPKG_BINARY not available - cannot determine architecture." ; eend 1
-  bailout
+# check required programs are available {{{
+DPKG_BINARY='dpkg'
+MKSQUASHFS_BINARY='mksquashfs'
+XORRISO_BINARY='xorriso'
+# optional programs, used only with EXTRACT_ISO_NAME
+OSIRROX_BINARY='osirrox'
+UNSQUASHFS_BINARY='unsquashfs'
+
+for program in "$DPKG_BINARY" "$MKSQUASHFS_BINARY" "$XORRISO_BINARY" ; do
+  if ! type "$program" >/dev/null 2>&1 ; then
+    eerror "Error: $program not available - cannot continue." ; eend 1
+    bailout
+  fi
+done
+if [ -n "$EXTRACT_ISO_NAME" ] ; then
+  for program in "$OSIRROX_BINARY" "$UNSQUASHFS_BINARY" ; do
+    if ! type "$program" >/dev/null 2>&1 ; then
+      eerror "Error: $program not available - required for unpacking ISO." ; eend 1
+      bailout
+    fi
+  done
 fi
-[ -n "$MKSQUASHFS_BINARY" ]       || MKSQUASHFS_BINARY='mksquashfs'
-if [ -z "$SKIP_MKSQUASHFS" ] && ! type "$MKSQUASHFS_BINARY" >/dev/null 2>&1 ; then
-  eerror "Error: $MKSQUASHFS_BINARY not available - cannot build squashfs." ; eend 1
-  bailout
-fi
-[ -n "$OSIRROX_BINARY" ]          || OSIRROX_BINARY='osirrox'
-if [ -n "$EXTRACT_ISO_NAME" ] && ! type "$OSIRROX_BINARY" >/dev/null 2>&1 ; then
-  eerror "Error: $OSIRROX_BINARY not available - cannot extract ISO." ; eend 1
-  bailout
-fi
-[ -n "$UNSQUASHFS_BINARY" ]       || UNSQUASHFS_BINARY='unsquashfs'
-if [ -n "$EXTRACT_ISO_NAME" ] && ! type "$UNSQUASHFS_BINARY" >/dev/null 2>&1 ; then
-  eerror "Error: $UNSQUASHFS_BINARY not available - cannot extract ISO." ; eend 1
-  bailout
-fi
-[ -n "$XORRISO_BINARY" ]          || XORRISO_BINARY='xorriso'
-if [ -z "$SKIP_MKISOFS" ] && ! type "$XORRISO_BINARY" >/dev/null 2>&1 ; then
-  eerror "Error: $XORRISO_BINARY not available - cannot build ISO." ; eend 1
-  bailout
-fi
+# }}}
 
 if [ -n "$SQUASHFS_EXCLUDES_FILE" ] ; then
   eerror "The variable \$SQUASHFS_EXCLUDES_FILE is set, but it is unsupported." ; eend 1
