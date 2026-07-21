@@ -336,6 +336,11 @@ if [ -z "$SKIP_MKISOFS" ] && ! type "$XORRISO_BINARY" >/dev/null 2>&1 ; then
   bailout
 fi
 
+if [ -n "$SQUASHFS_EXCLUDES_FILE" ] ; then
+  eerror "The variable \$SQUASHFS_EXCLUDES_FILE is set, but it is unsupported." ; eend 1
+  eerror "Please unset it. Current value: \$SQUASHFS_EXCLUDES_FILE=${SQUASHFS_EXCLUDES_FILE}" ; eend 1
+  bailout
+fi
 if [ -n "$BUILD_OUTPUT" ] ; then
   eerror "The variable \$BUILD_OUTPUT is set, but it is unsupported." ; eend 1
   eerror "Please unset it. Current value: \$BUILD_OUTPUT=${BUILD_OUTPUT}" ; eend 1
@@ -377,12 +382,9 @@ fi
 [ -n "$GRML_FAI_CONFIG" ]         || GRML_FAI_CONFIG='/usr/share/grml-live/config'
 [ -n "$GRML_NAME" ]               || GRML_NAME='grml'
 [ -n "$HOSTNAME" ]                || HOSTNAME='grml'
-[ -n "$NO_ADDONS" ]               || NO_ADDONS=''
-[ -n "$NO_BOOTID" ]               || NO_BOOTID=''
 [ -n "$OUTPUT" ]                  || OUTPUT="$PWD/grml/"
 [ -n "$RELEASENAME" ]             || RELEASENAME='grml-live rocks'
 [ -n "$SECURE_BOOT" ]             || SECURE_BOOT='disable'
-[ -n "$SQUASHFS_EXCLUDES_FILE" ]  || SQUASHFS_EXCLUDES_FILE="${GRML_FAI_CONFIG}/grml/squashfs-excludes"
 [ -n "$SUITE" ]                   || SUITE='testing'
 [ -n "$USERNAME" ]                || USERNAME='grml'
 [ -n "$VERSION" ]                 || VERSION='0.0.1'
@@ -482,7 +484,7 @@ fi
 # }}}
 
 # Warn user if addons from grml-live-addons are absent {{{
-if [ -z "${NO_ADDONS:-}" ] && [ ! -r "$GRML_FAI_CONFIG"/media-files/GRMLBASE/addons/arch ] ; then
+if [ ! -r "$GRML_FAI_CONFIG"/media-files/GRMLBASE/addons/arch ] ; then
   ewarn "Boot addons not found (Consider installing package grml-live-addons)" ; eend 0
 fi
 # }}}
@@ -507,7 +509,6 @@ echo "  SOURCE_DATE_EPOCH: $SOURCE_DATE_EPOCH"
 [ -n "$SECURE_BOOT" ]         && echo "  Secure Boot:       $SECURE_BOOT"
 [ -n "$CHROOT_INSTALL" ]      && echo "  Install files from directory to chroot:  $CHROOT_INSTALL"
 [ -n "$BOOTID" ]              && echo "  Boot identifier:   $BOOTID"
-[ -n "$NO_BOOTID" ]           && echo "  Skipping bootid feature."
 [ -n "$CHOWN_USER" ]          && echo "  Output owner:      $CHOWN_USER"
 [ -n "$DEFAULT_BOOTOPTIONS" ] && echo "  Adding default bootoptions: \"$DEFAULT_BOOTOPTIONS\""
 [ -n "$LOGFILE" ]             && echo "  Logging to file:   $LOGFILE"
@@ -519,7 +520,6 @@ else
     [ -n "$SKIP_MKSQUASHFS" ]     && echo "  Skipping creation of SQUASHFS file."
     [ -n "$SKIP_NETBOOT" ]        && echo "  Skipping creation of NETBOOT package."
     [ -n "$SKIP_MKISOFS" ]        && echo "  Skipping creation of ISO file."
-    [ -n "$NO_ADDONS" ]           && echo "  Skipping boot addons."
     [ -n "$BUILD_ONLY" ]          && echo "  Executing BUILD_ONLY instead of fresh installation or UPDATE."
     [ -n "$BUILD_DIRTY" ]         && echo "  Executing BUILD_DIRTY to leave chroot untouched."
 fi
@@ -557,12 +557,8 @@ SQUASHFS_NAME20="$(extend_string_end 20 "$SQUASHFS_NAME20")"
 # shellcheck disable=SC2034 # Calculated just to write it into CONFIGDUMP.
 BOOT_FILE="/conf/bootfile_${SHORT_NAME}_${SOURCE_DATE_EPOCH}"
 
-if [ -n "$NO_BOOTID" ] ; then
-  BOOTID=""
-else
-  if [ -z "$BOOTID" ] ; then
-    BOOTID=$(echo "${GRML_NAME}${VERSION}" | tr -d ',./;\- ')
-  fi
+if [ -z "$BOOTID" ] ; then
+  BOOTID=$(echo "${GRML_NAME}${VERSION}" | tr -d ',./;\- ')
 fi
 
 BUILD_OUTPUT="${OUTPUT}/grml_cd"
@@ -624,7 +620,7 @@ einfo "Logging actions to logfile $LOGFILE"
 # dump config variables into file, for hooks/scripts access {{{
 CONFIGDUMP=$(mktemp)
 set | grep -E \
-  '^(GRML_NAME|SHORT_NAME|RELEASENAME|RELEASE_INFO|RELEASE_INFO68|DATE|VERSION|SUITE|ARCH|DISTRI_INFO|DISTRI_NAME|SQUASHFS_NAME|SQUASHFS_NAME20|USERNAME|HOSTNAME|APT_PROXY|BUILD_ONLY|BOOTSTRAP_ONLY|WAYBACK_DATE|GRML_LIVE_DEBUG_APT|GRML_FAI_CONFIG|SOURCE_DATE_EPOCH|NO_BOOTID|BOOTID|BOOT_FILE|DEFAULT_BOOTOPTIONS|SECURE_BOOT|NO_ADDONS)=' \
+  '^(GRML_NAME|SHORT_NAME|RELEASENAME|RELEASE_INFO|RELEASE_INFO68|DATE|VERSION|SUITE|ARCH|DISTRI_INFO|DISTRI_NAME|SQUASHFS_NAME|SQUASHFS_NAME20|USERNAME|HOSTNAME|APT_PROXY|BUILD_ONLY|BOOTSTRAP_ONLY|WAYBACK_DATE|GRML_LIVE_DEBUG_APT|GRML_FAI_CONFIG|SOURCE_DATE_EPOCH|BOOTID|BOOT_FILE|DEFAULT_BOOTOPTIONS|SECURE_BOOT)=' \
   > "${CONFIGDUMP}"
 # }}}
 
@@ -845,10 +841,8 @@ else
    # 2) prevents unpacking errors in a later build-only step in containers not supporting xattrs.
    SQUASHFS_OPTIONS="$SQUASHFS_OPTIONS -no-xattrs"
 
-   # support exclusion of files via exclude-file:
-   if [ -n "${SQUASHFS_EXCLUDES_FILE}" ] && [ -r "${SQUASHFS_EXCLUDES_FILE}" ] ; then
-     SQUASHFS_OPTIONS="${SQUASHFS_OPTIONS} -wildcards -ef ${SQUASHFS_EXCLUDES_FILE}"
-   fi
+   # Static file exclusion list.
+   SQUASHFS_OPTIONS="${SQUASHFS_OPTIONS} -wildcards -ef ${GRML_FAI_CONFIG}/grml/squashfs-excludes"
 
    # log stuff
    SQUASHFS_STDERR="$(mktemp -t grml-live.XXXXXX)"

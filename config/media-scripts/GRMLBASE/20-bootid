@@ -17,14 +17,8 @@ target=${target:?}
 media_dir="${target}/${GRML_LIVE_MEDIADIR}"
 mkdir -p "${media_dir}"/conf
 
-# we need to set "$BOOTID" before we invoke adjust_boot_files for the
-# first time, being inside grub_setup below
-if [ -n "$NO_BOOTID" ] ; then
-  echo "I: Skipping bootid feature as requested via \$NO_BOOTID."
-else
-  echo "I: Generating /conf/bootid.txt with content ${BOOTID}."
-  echo "$BOOTID" > "${media_dir}"/conf/bootid.txt
-fi
+echo "I: Generating /conf/bootid.txt with: ${BOOTID}"
+echo "$BOOTID" > "${media_dir}"/conf/bootid.txt
 
 # every recent Grml ISO ships a /conf/bootid.txt, though GRUB might find
 # the /conf/bootid.txt of a different (Grml) ISO than the one that's
