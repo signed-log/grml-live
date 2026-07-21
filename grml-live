@@ -852,11 +852,7 @@ else
 
    # log stuff
    SQUASHFS_STDERR="$(mktemp -t grml-live.XXXXXX)"
-
-   # informational stuff
-   [ -n "$SQUASHFS_OPTIONS" ]  && SQUASHFS_INFO_MSG="$SQUASHFS_OPTIONS"
-   [ -n "$SQUASHFS_INFO_MSG" ] && SQUASHFS_INFO_MSG="using options: $SQUASHFS_INFO_MSG"
-   einfo "Squashfs build information: running $MKSQUASHFS_BINARY $SQUASHFS_INFO_MSG"
+   einfo "Squashfs build information: running $MKSQUASHFS_BINARY using options: $SQUASHFS_OPTIONS"
 
    log "$MKSQUASHFS_BINARY $CHROOT_OUTPUT/ $BUILD_OUTPUT/live/${GRML_NAME}/${GRML_NAME}.squashfs -noappend $SQUASHFS_OPTIONS"
    # shellcheck disable=SC2086 # $SQUASHFS_OPTIONS needs splitting
