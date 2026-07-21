@@ -77,7 +77,6 @@ arguments=( #{{{
   '-r[release name]:release name:'
   '-s[debian suite to be used for live-system]:Debian suite:_grmllive_suites'
   '-u[update existing chroot instead of rebuilding it from scratch]'
-  '-U[arrange output to be owned by specified username]'
   '-w[wayback machine, build system using Debian archives from specified date]:wayback date(s):_grmllive_apt_snapshot_dates'
 )
 #}}}
