@@ -368,11 +368,6 @@ fi
 # }}}
 
 # some misc checks before doing work {{{
-[ -n "$CLASSES" ] || bailout 1 "Error: \$CLASSES unset, please set it in $LIVE_CONF or
-specify it on the command line using the -c option."
-[ -n "$OUTPUT" ] || bailout 1 "Error: \$OUTPUT unset, please set it in $LIVE_CONF or
-specify it on the command line using the -o option."
-
 if [ ! -d "$GRML_FAI_CONFIG"/scripts ] ; then
   eerror "Config directory \"${GRML_FAI_CONFIG}\" does not exist. Set -D to a valid config directory."
   bailout 1
