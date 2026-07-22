@@ -681,10 +681,6 @@ elif [ -n "$UPDATE" ] ; then
   FAI_ACTION=softupdate
 elif [ -n "$BUILD_DIRTY" ] ; then
   FAI_ACTION=rebuild
-elif [ -r "$CHROOT_OUTPUT/etc/debian_version" ] ; then
-  log   "Skipping chroot bootstrap as $CHROOT_OUTPUT exists already."
-  ewarn "Skipping chroot bootstrap as $CHROOT_OUTPUT exists already." ; eend 0
-  FAI_ACTION=rebuild
 else
   FAI_ACTION=dirinstall
 fi
@@ -692,6 +688,13 @@ fi
 if ! [ "$FAI_ACTION" = dirinstall ] && ! [ -r "$CHROOT_OUTPUT/etc/debian_version" ] ; then
   log    "Error: does not look like you have a working chroot. Updating/building not possible."
   eerror "Error: does not look like you have a working chroot. Updating/building not possible. (Drop -u/-b/-B option?)"
+  eend 1
+  bailout 20
+fi
+
+if [ "$FAI_ACTION" = dirinstall ] && [ -r "$CHROOT_OUTPUT/etc/debian_version" ] ; then
+  log    "Error: the chroot already exists. Refusing to overwrite it."
+  eerror "Error: the chroot already exists. Refusing to overwrite it. (Add -u/-b/-B option?)"
   eend 1
   bailout 20
 fi
