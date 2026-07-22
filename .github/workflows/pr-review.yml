@@ -76,8 +76,6 @@ jobs:
           # Check main scripts
           for script in \
             build-driver/build \
-            config/files/GRMLBASE/usr/bin/restore-config \
-            config/files/GRMLBASE/usr/bin/save-config \
             config/files/GRMLBASE/usr/share/grml-autoconfig/autoconfig.functions \
             config/files/GRMLBASE/usr/share/grml-autoconfig/grml-autoconfig \
             debian/update-grml-live-version \
