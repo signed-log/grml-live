@@ -45,8 +45,8 @@ $PN - build process script for generating a (grml based) Linux Live-ISO
 Usage: $PN [options, see as follows]
 
    -A                      clean build directories before and after running
-   -b                      build the ISO without updating the chroot
-   -B                      build the ISO without touching the chroot (do not clean up)
+   -b                      build from an existing chroot
+   -B                      build from an existing chroot without running scripts
    -c <class[es]>          classes to be used for building the ISO
    -C <configfile>         configuration file for grml-live
    -d <date>               use specified date instead of build time as date of release
@@ -63,7 +63,7 @@ Usage: $PN [options, see as follows]
    -r <release_name>       release name
    -R                      skip applying RELEASE clean up
    -s <suite>              Debian suite/release, like: stable, testing, unstable
-   -u                      update existing chroot instead of rebuilding it from scratch
+   -u                      update and build from an existing chroot
    -v <version_number>     specify version number of the release
    -w <date>               wayback machine, build system using Debian archives
                            from specified date
@@ -461,6 +461,21 @@ if [ ! -r "$GRML_FAI_CONFIG"/media-files/GRMLBASE/addons/arch ] ; then
 fi
 # }}}
 
+# Prevent incompatible option combinations {{{
+if [ -n "$BUILD_ONLY" ] && [ -n "$BUILD_DIRTY" ] ; then
+  eerror "Only one of -b and -B can be given at a time. Remove one of them."
+  bailout 1
+fi
+if [ -n "$BUILD_ONLY" ] && [ -n "$UPDATE" ] ; then
+  eerror "Only one of -b and -u can be given at a time. Remove one of them."
+  bailout 1
+fi
+if [ -n "$BUILD_DIRTY" ] && [ -n "$UPDATE" ] ; then
+  eerror "Only one of -B and -u can be given at a time. Remove one of them."
+  bailout 1
+fi
+# }}}
+
 # Show configuration and ask user whether to continue {{{
 echo
 echo "${PN} [${GRML_LIVE_VERSION}] Build Configuration:"
@@ -486,7 +501,7 @@ echo "  Architecture:      $ARCH"
 [ -n "$CLEAN_ARTIFACTS" ]     && echo "  Will clean output before and after running."
 [ -n "$UPDATE" ]              && echo "  Executing UPDATE instead of fresh installation."
 [ -n "$SKIP_MKSQUASHFS" ]     && echo "  Skipping creation of SQUASHFS file."
-[ -n "$BUILD_ONLY" ]          && echo "  Executing BUILD_ONLY instead of fresh installation or UPDATE."
+[ -n "$BUILD_ONLY" ]          && echo "  Executing BUILD_ONLY instead of fresh installation."
 [ -n "$BUILD_DIRTY" ]         && echo "  Executing BUILD_DIRTY to leave chroot untouched."
 [ -n "$SKIP_RELEASE" ]        && echo "  Skipping RELEASE clean up."
 echo
@@ -666,10 +681,6 @@ elif [ -n "$UPDATE" ] ; then
   FAI_ACTION=softupdate
 elif [ -n "$BUILD_DIRTY" ] ; then
   FAI_ACTION=rebuild
-elif [ -r "$CHROOT_OUTPUT/etc/debian_version" ] ; then
-  log   "Skipping chroot bootstrap as $CHROOT_OUTPUT exists already."
-  ewarn "Skipping chroot bootstrap as $CHROOT_OUTPUT exists already." ; eend 0
-  FAI_ACTION=rebuild
 else
   FAI_ACTION=dirinstall
 fi
@@ -677,6 +688,13 @@ fi
 if ! [ "$FAI_ACTION" = dirinstall ] && ! [ -r "$CHROOT_OUTPUT/etc/debian_version" ] ; then
   log    "Error: does not look like you have a working chroot. Updating/building not possible."
   eerror "Error: does not look like you have a working chroot. Updating/building not possible. (Drop -u/-b/-B option?)"
+  eend 1
+  bailout 20
+fi
+
+if [ "$FAI_ACTION" = dirinstall ] && [ -r "$CHROOT_OUTPUT/etc/debian_version" ] ; then
+  log    "Error: the chroot already exists. Refusing to overwrite it."
+  eerror "Error: the chroot already exists. Refusing to overwrite it. (Add -u/-b/-B option?)"
   eend 1
   bailout 20
 fi
@@ -737,8 +755,8 @@ fi
 cap_timestamps "$CHROOT_OUTPUT"
 
 if [ -n "$SKIP_MKSQUASHFS" ] ; then
-   log   "Skipping stage 'squashfs' as requested via option -q or -N"
-   ewarn "Skipping stage 'squashfs' as requested via option -q or -N" ; eend 0
+   log   "Skipping stage 'squashfs' as requested via option -q"
+   ewarn "Skipping stage 'squashfs' as requested via option -q" ; eend 0
 else
    mkdir -p "$BUILD_OUTPUT"/live/"${GRML_NAME}"/
 
