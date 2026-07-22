@@ -1,5 +1,7 @@
 dev/*
 run/*
+# The dynamic linker auxiliary cache is not reproducible and is always invalid at boot (see Debian bug #845034).
+var/cache/ldconfig/aux-cache
 var/run/*
 var/lock/*
 var/lib/dkms/*
