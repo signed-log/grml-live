@@ -461,6 +461,21 @@ if [ ! -r "$GRML_FAI_CONFIG"/media-files/GRMLBASE/addons/arch ] ; then
 fi
 # }}}
 
+# Prevent incompatible option combinations {{{
+if [ -n "$BUILD_ONLY" ] && [ -n "$BUILD_DIRTY" ] ; then
+  eerror "Only one of -b and -B can be given at a time. Remove one of them."
+  bailout 1
+fi
+if [ -n "$BUILD_ONLY" ] && [ -n "$UPDATE" ] ; then
+  eerror "Only one of -b and -u can be given at a time. Remove one of them."
+  bailout 1
+fi
+if [ -n "$BUILD_DIRTY" ] && [ -n "$UPDATE" ] ; then
+  eerror "Only one of -B and -u can be given at a time. Remove one of them."
+  bailout 1
+fi
+# }}}
+
 # Show configuration and ask user whether to continue {{{
 echo
 echo "${PN} [${GRML_LIVE_VERSION}] Build Configuration:"
