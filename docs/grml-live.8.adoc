@@ -12,7 +12,7 @@ Synopsis
 grml-live [-c <classe[s]>] [-C <configfile>] [
 -e <extract_iso_name>] [-g <grml_name>] [-i <iso_name>] [
 -o <output_directory>] [-r <release_name>] [-s <suite>] [
--v <version_number>] [-U <username>] [-w <date>] [-AbBFqRu]
+-v <version_number>] [-w <date>] [-AbBFqRu]
 
 Description
 -----------
@@ -183,10 +183,6 @@ corresponding release names like "trixie").
   -u::
 
 Update existing chroot instead of rebuilding it from scratch..
-
-  -U **USERNAME**::
-
-Sets ownership of all build output files to specified username before exiting.
 
   -v **VERSION_NUMBER**::
 

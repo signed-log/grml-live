@@ -64,7 +64,6 @@ Usage: $PN [options, see as follows]
    -R                      skip applying RELEASE clean up
    -s <suite>              Debian suite/release, like: stable, testing, unstable
    -u                      update existing chroot instead of rebuilding it from scratch
-   -U <username>           arrange output to be owned by specified username
    -v <version_number>     specify version number of the release
    -w <date>               wayback machine, build system using Debian archives
                            from specified date
@@ -173,18 +172,6 @@ bailout() {
     [ -n "${CHROOT_OUTPUT}" ] && [ -d "${CHROOT_OUTPUT}" ] && rm -r "${CHROOT_OUTPUT}"
     eend 0
   fi
-
-  if [ -n "$CHOWN_USER" ]; then
-    log "Setting ownership"
-    einfo "Setting ownership"
-    [ -n "${OUTPUT}"         ] && [ -d "${OUTPUT}"         ] && chown -R "${CHOWN_USER}:" "${OUTPUT}"
-    [ -n "${BUILD_OUTPUT}"   ] && [ -d "${BUILD_OUTPUT}"   ] && chown -R "${CHOWN_USER}:" "${BUILD_OUTPUT}"
-    [ -n "${CHROOT_OUTPUT}"  ] && [ -d "${CHROOT_OUTPUT}"  ] && chown -R "${CHOWN_USER}:" "${CHROOT_OUTPUT}"
-    [ -n "${ISO_OUTPUT}"     ] && [ -d "${ISO_OUTPUT}"     ] && chown -R "${CHOWN_USER}:" "${ISO_OUTPUT}"
-    [ -n "${LOG_OUTPUT}"     ] && [ -d "${LOG_OUTPUT}"     ] && chown -R "${CHOWN_USER}:" "${LOG_OUTPUT}"
-    [ -n "${NETBOOT}"        ] && [ -d "${NETBOOT}"        ] && chown -R "${CHOWN_USER}:" "${NETBOOT}"
-    eend 0
-  fi
   log "------------------------------------------------------------------------------"
   exit "$EXIT"
 }
@@ -229,7 +216,7 @@ hasclass() {
 # }}}
 
 # command line parsing {{{
-while getopts "C:c:d:D:e:g:i:I:o:r:s:U:v:w:AbBFhqRu" opt; do
+while getopts "C:c:d:D:e:g:i:I:o:r:s:v:w:AbBFhqRu" opt; do
   case "$opt" in
     A) CLEAN_ARTIFACTS=1 ;;
     b) BUILD_ONLY=1 ;;
@@ -251,7 +238,6 @@ while getopts "C:c:d:D:e:g:i:I:o:r:s:U:v:w:AbBFhqRu" opt; do
     v) VERSION="$OPTARG" ;;
     F) FORCE=1 ;;
     u) UPDATE=1 ;;
-    U) CHOWN_USER="$OPTARG" ;;
     w) export WAYBACK_DATE="$OPTARG" ;;
     ?) echo "invalid option -$OPTARG" >&2; usage; bailout 1 ;;
   esac
@@ -490,7 +476,6 @@ echo "  Architecture:      $ARCH"
 [ -n "$SECURE_BOOT" ]         && echo "  Secure Boot:       $SECURE_BOOT"
 [ -n "$CHROOT_INSTALL" ]      && echo "  Install files from directory to chroot:  $CHROOT_INSTALL"
 [ -n "$BOOTID" ]              && echo "  Boot identifier:   $BOOTID"
-[ -n "$CHOWN_USER" ]          && echo "  Output owner:      $CHOWN_USER"
 [ -n "$DEFAULT_BOOTOPTIONS" ] && echo "  Adding default bootoptions: \"$DEFAULT_BOOTOPTIONS\""
 [ -n "$LOGFILE" ]             && echo "  Logging to file:   $LOGFILE"
 [ -n "$CLEAN_ARTIFACTS" ]     && echo "  Will clean output before and after running."
@@ -835,7 +820,6 @@ generate_build_info() {
     mkisofs_version="$(${XORRISO_BINARY} --version 2>/dev/null | head -1 || true)" \
     mksquashfs_cmdline="${MKSQUASHFS_BINARY} ${CHROOT_OUTPUT}/ ${BUILD_OUTPUT}/live/${GRML_NAME}/${GRML_NAME}.squashfs -noappend ${SQUASHFS_OPTIONS}" \
     mksquashfs_version="$(${MKSQUASHFS_BINARY} -version | head -1 || true)" \
-    output_owner="${CHOWN_USER}" \
     release_info="${RELEASE_INFO}" \
     release_name="${RELEASENAME}" \
     secure_boot="${SECURE_BOOT}" \
