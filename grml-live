@@ -45,8 +45,8 @@ $PN - build process script for generating a (grml based) Linux Live-ISO
 Usage: $PN [options, see as follows]
 
    -A                      clean build directories before and after running
-   -b                      build the ISO without updating the chroot
-   -B                      build the ISO without touching the chroot (do not clean up)
+   -b                      build from an existing chroot
+   -B                      build from an existing chroot without running scripts
    -c <class[es]>          classes to be used for building the ISO
    -C <configfile>         configuration file for grml-live
    -d <date>               use specified date instead of build time as date of release
@@ -63,7 +63,7 @@ Usage: $PN [options, see as follows]
    -r <release_name>       release name
    -R                      skip applying RELEASE clean up
    -s <suite>              Debian suite/release, like: stable, testing, unstable
-   -u                      update existing chroot instead of rebuilding it from scratch
+   -u                      update and build from an existing chroot
    -v <version_number>     specify version number of the release
    -w <date>               wayback machine, build system using Debian archives
                            from specified date
@@ -486,7 +486,7 @@ echo "  Architecture:      $ARCH"
 [ -n "$CLEAN_ARTIFACTS" ]     && echo "  Will clean output before and after running."
 [ -n "$UPDATE" ]              && echo "  Executing UPDATE instead of fresh installation."
 [ -n "$SKIP_MKSQUASHFS" ]     && echo "  Skipping creation of SQUASHFS file."
-[ -n "$BUILD_ONLY" ]          && echo "  Executing BUILD_ONLY instead of fresh installation or UPDATE."
+[ -n "$BUILD_ONLY" ]          && echo "  Executing BUILD_ONLY instead of fresh installation."
 [ -n "$BUILD_DIRTY" ]         && echo "  Executing BUILD_DIRTY to leave chroot untouched."
 [ -n "$SKIP_RELEASE" ]        && echo "  Skipping RELEASE clean up."
 echo

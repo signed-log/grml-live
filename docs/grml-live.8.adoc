@@ -56,7 +56,7 @@ clean up the Chroot target and Build target directories.
 
   -b::
 
-Build the ISO without updating the chroot. This option is useful for
+Build the ISO without installing package updates. This option is useful for
 example when working on stable releases: if you have a working base
 system/chroot and do not want to execute any further updates (via "-u" option)
 but intend to only build the ISO.
@@ -182,7 +182,7 @@ corresponding release names like "trixie").
 
   -u::
 
-Update existing chroot instead of rebuilding it from scratch..
+Update existing chroot, and build the ISO.
 
   -v **VERSION_NUMBER**::
 
