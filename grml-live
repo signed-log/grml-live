@@ -140,12 +140,6 @@ else
 fi
 # }}}
 
-# umount all directories {{{
-umount_all() {
-   [ -n "$MIRROR_DIRECTORY" ] && umount "${CHROOT_OUTPUT}/${MIRROR_DIRECTORY}"
-}
-# }}}
-
 # store logfiles {{{
 store_logfiles() {
   # move minifai logs into grml_logs directory
@@ -162,7 +156,6 @@ store_logfiles() {
 bailout() {
   [ -n "$CONFIGDUMP"      ]  && rm -f  "$CONFIGDUMP"
   [ -n "$SQUASHFS_STDERR" ]  && rm -rf "$SQUASHFS_STDERR"
-  umount_all
   [ -n "$1" ] && EXIT="$1" || EXIT="1"
   [ -n "$2" ] && eerror "$2">&2
   if [ -n "$CLEAN_ARTIFACTS" ]; then
@@ -176,7 +169,6 @@ bailout() {
   exit "$EXIT"
 }
 trap bailout 1 2 3 3 6 14 15
-trap umount_all EXIT
 # }}}
 
 # some important functions {{{
@@ -696,11 +688,6 @@ fi
 
 mkdir -p "$CHROOT_OUTPUT" || bailout 5 "Problem with creating $CHROOT_OUTPUT"
 
-if [ -n "${MIRROR_DIRECTORY}" ] ; then
-  mkdir -p "${CHROOT_OUTPUT}/${MIRROR_DIRECTORY}"
-  mount --bind "${MIRROR_DIRECTORY}" "${CHROOT_OUTPUT}/${MIRROR_DIRECTORY}"
-fi
-
 log "Executed FAI command line:"
 log "${FAI_PROGRAM} ${GRML_FAI_CONFIG} ${CLASSES} ${FAI_ACTION} ${CHROOT_OUTPUT} ${CONFIGDUMP} ${SUITE} ${BOOTSTRAP_MIRROR}"
 einfo "${FAI_PROGRAM} ${GRML_FAI_CONFIG} ${CLASSES} ${FAI_ACTION} ${CHROOT_OUTPUT} ${CONFIGDUMP} ${SUITE} ${BOOTSTRAP_MIRROR}"
@@ -718,8 +705,6 @@ if [ "$RC" != 0 ] ; then
 fi
 
 mv "${CHROOT_OUTPUT}"/grml-live/grml_sources/ "${OUTPUT}"
-
-umount_all
 
 log "Finished execution of stage 'fai $FAI_ACTION' [$(date)]"
 einfo "Finished execution of stage 'fai $FAI_ACTION'"
