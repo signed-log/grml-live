@@ -545,9 +545,6 @@ BOOTSTRAP_MIRROR in /etc/grml/grml-live.conf[.local]. If you're setting up
 your own class file make sure to include the class name in the class list
 (grml-live -c ...).
 
-If you want to use a local (for example NFS mount) mirror additionally then
-adjust MIRROR_DIRECTORY in /etc/grml/grml-live.conf[.local] as well.
-
 If you want to use a HTTP Proxy (like apt-cacher-ng), set APT_PROXY. Example:
 
   APT_PROXY="http://localhost:3142/"
@@ -615,30 +612,7 @@ How to use your own local repository
 
 Let's assume you have Debian package(s) in your filesystem inside
 `/home/foobar/local-packages` and want to provide them to your grml-live build.
-This can be achieved either 1) through a bind mount (using the MIRROR_DIRECTORY
-configuration) or 2) by serving a repository via HTTP.
-
-Serving via bind mount / MIRROR_DIRECTORY
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Make sure to create an according sources.list configuration file, e.g. using
-your own class name `CUSTOM`:
-
-  # cat > $GRML_FAI_CONFIG/files/CUSTOM/etc/apt/sources.list.d/local-packages.list << EOF
-  deb file:///home/foobar/local-packages ./
-  EOF
-
-Add the according MIRROR_DIRECTORY configuration to your grml-live configuration:
-
-  # echo "MIRROR_DIRECTORY='/home/foobar/packages'" >> /etc/grml/grml-live.local
-
-Make sure the local directory looks like a mirror:
-
-  % cd /home/foobar/packages
-  % dpkg-scanpackages . /dev/null | gzip > Packages.gz
-
-Finally invoke grml-live with your class name (`CUSTOM` in this example) added
-to the list of classes on the command line (see grml-live option `-c`).
+The easiest option is by serving this repository via HTTP.
 
 Serving a repository via HTTP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
