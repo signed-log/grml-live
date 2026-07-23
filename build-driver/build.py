@@ -128,7 +128,6 @@ def run_grml_live(
     grml_live_cmd = [
         grml_live_path / "grml-live",
         "-F",  # do not prompt
-        "-A",  # cleanup afterwards
         "-c",
         ",".join(classes),
         "-s",
@@ -213,9 +212,13 @@ def results_mover(build_dir: Path, output_dir: Path):
         raise
     finally:
         print(f"I: moving build results from {build_dir} to {output_dir}")
-        if output_dir.exists():
-            raise RuntimeError(f"output_dir {output_dir} exists, but shutil.move requires it not to")
-        shutil.move(build_dir, output_dir)
+        output_dir.mkdir()
+        for path in build_dir.glob("*"):
+            if path.name in ("grml_cd", "grml_chroot"):
+                print(f"I: ignoring {path.name}")
+                continue
+            print(f"I: moving {path} into {output_dir}")
+            shutil.move(str(path), output_dir / path.name)
 
 
 def download_file(url: str, local_path: Path):
